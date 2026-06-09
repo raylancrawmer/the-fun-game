@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fun Game</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      font-family: Arial, sans-serif;
+      background: #fff4e6;
+      color: #5a2d0c;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: #ff8a00;
+      color: white;
+    }
+
+    #iconBox {
+      display: none;
+      width: 220px;
+      min-height: 140px;
+      border-radius: 24px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    #iconBox img {
+      max-width: 100%;
+      border-radius: 16px;
+      display: block;
+    }
+
+    #optionBar {
+      display: none;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .optionLink {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: #5a2d0c;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #gameBar {
+      display: none;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #miniGameArea {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #gameCanvas {
+      background: #cfe8ff;
+      border: 4px solid #5a2d0c;
+      border-radius: 16px;
+    }
+
+    #scoreBoard {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      font-weight: bold;
+    }
+
+    #winMessage {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 28px;
+      border-radius: 18px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #parkourHint {
+      display: none;
+      padding: 10px 16px;
+      border-radius: 14px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="scoreBoard">jumps: 0</div>
+  <div id="winMessage">
+    <div>you won</div>
+    <button id="playAgainButton">play again</button>
+  </div>
+  <h1 id="mainTitle">im ray i am pizza and tacos</h1>
+  <button id="showButton">pizza button</button>
+  <div id="iconBox">
+    <img src="download.webp" alt="Pizza image">
+  </div>
+  <div id="optionBar">
+    <a class="optionLink" href="https://www.papajohns.com/" target="_blank" rel="noopener noreferrer">papa johns</a>
+    <a class="optionLink" href="https://www.tacobell.com/" target="_blank" rel="noopener noreferrer">taco bell</a>
+  </div>
+  <button id="gamesButton" style="display: none;">video games</button>
+  <button id="developerModeButton" style="display: none;">developer mode</button>
+  <div id="gameBar">
+    <a class="optionLink" href="https://www.bestbuy.com/" target="_blank" rel="noopener noreferrer">best buy</a>
+    <a class="optionLink" href="https://www.gamestop.com/" target="_blank" rel="noopener noreferrer">game stop</a>
+    <button id="miniGameButton">mini game</button>
+    <button id="videoMenuMainButton">main menu</button>
+  </div>
+  <div id="miniGameArea">
+    <h1>mini game</h1>
+    <canvas id="gameCanvas" width="500" height="260"></canvas>
+    <div id="parkourHint">one of the pillars is fake</div>
+    <div>use w a s d to move and space bar to jump</div>
+    <button id="mainMenuButton">main menu</button>
+  </div>
+
+  <script>
+    const showButton = document.getElementById('showButton');
+    const gamesButton = document.getElementById('gamesButton');
+    const developerModeButton = document.getElementById('developerModeButton');
+    const mainTitle = document.getElementById('mainTitle');
+    const iconBox = document.getElementById('iconBox');
+    const optionBar = document.getElementById('optionBar');
+    const gameBar = document.getElementById('gameBar');
+    const miniGameButton = document.getElementById('miniGameButton');
+    const miniGameArea = document.getElementById('miniGameArea');
+    const mainMenuButton = document.getElementById('mainMenuButton');
+    const videoMenuMainButton = document.getElementById('videoMenuMainButton');
+    const scoreBoard = document.getElementById('scoreBoard');
+    const winMessage = document.getElementById('winMessage');
+    const playAgainButton = document.getElementById('playAgainButton');
+    const parkourHint = document.getElementById('parkourHint');
+    const gameCanvas = document.getElementById('gameCanvas');
+    const gameContext = gameCanvas.getContext('2d');
+
+    const player = {
+      x: 40,
+      y: 190,
+      width: 30,
+      height: 30,
+      velocityX: 0,
+      velocityY: 0,
+      speed: 4,
+      jumpPower: -11,
+      onGround: true
+    };
+
+    const keys = {};
+    const gravity = 0.5;
+    const floorY = 220;
+    const groundTop = floorY + player.height;
+    const obstacles = [];
+    let lastSpawnTime = 0;
+    let jumpedBlocks = 0;
+    let obstacleHeight = player.height * 2;
+    let parkourMode = false;
+
+    function updateScore() {
+      scoreBoard.textContent = `jumps: ${jumpedBlocks}`;
+    }
+
+    function resetMiniGame() {
+      player.x = 40;
+      player.y = 190;
+      player.velocityX = 0;
+      player.velocityY = 0;
+      player.onGround = true;
+      obstacles.length = 0;
+      lastSpawnTime = 0;
+      jumpedBlocks = 0;
+      obstacleHeight = player.height * 2;
+      parkourMode = false;
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+      updateScore();
+    }
+
+    function buildParkourCourse() {
+      obstacles.length = 0;
+      obstacles.push(
+        { x: 30, width: 70, height: 70, speed: 0, counted: true },
+        { x: 130, width: 70, height: 105, speed: 0, counted: true },
+        { x: 240, width: 70, height: 140, speed: 0, counted: true },
+        { x: 340, width: 70, height: 95, speed: 0, counted: true },
+        { x: 420, width: 60, height: 155, speed: 0, counted: true }
+      );
+
+      player.x = 45;
+      player.y = groundTop - obstacles[0].height - player.height;
+      player.velocityX = 0;
+      player.velocityY = 0;
+      player.onGround = true;
+    }
+
+    function startParkourMode() {
+      parkourMode = true;
+      buildParkourCourse();
+      scoreBoard.style.display = 'block';
+      parkourHint.style.display = 'block';
+    }
+
+    function spawnObstacle() {
+      const spawnDistance = player.width * 10;
+      obstacles.push({
+        x: Math.min(player.x + spawnDistance, gameCanvas.width - 50),
+        width: 50,
+        height: obstacleHeight,
+        speed: 2,
+        counted: false
+      });
+    }
+
+    function drawGame() {
+      gameContext.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+      gameContext.fillStyle = parkourMode ? '#ff8080' : '#8fd18f';
+      gameContext.fillRect(0, groundTop, gameCanvas.width, gameCanvas.height - floorY);
+
+      gameContext.fillStyle = '#5a2d0c';
+      gameContext.fillRect(0, groundTop - 6, gameCanvas.width, 6);
+
+      gameContext.fillStyle = '#7a3f14';
+      obstacles.forEach((obstacle) => {
+        gameContext.fillRect(
+          obstacle.x,
+          groundTop - obstacle.height,
+          obstacle.width,
+          obstacle.height
+        );
+      });
+
+      gameContext.fillStyle = '#ff8a00';
+      gameContext.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function isColliding(obstacle) {
+      const obstacleTop = groundTop - obstacle.height;
+      const obstacleBottom = obstacleTop + obstacle.height;
+      const playerRight = player.x + player.width;
+      const playerBottom = player.y + player.height;
+      const obstacleRight = obstacle.x + obstacle.width;
+
+      return (
+        player.x < obstacleRight &&
+        playerRight > obstacle.x &&
+        player.y < obstacleBottom &&
+        playerBottom > obstacleTop
+      );
+    }
+
+    function landOnPlatform() {
+      player.onGround = false;
+
+      for (const obstacle of obstacles) {
+        const obstacleTop = groundTop - obstacle.height;
+        const obstacleRight = obstacle.x + obstacle.width;
+        const playerRight = player.x + player.width;
+        const playerBottom = player.y + player.height;
+        const previousBottom = player.y + player.height - player.velocityY;
+
+        if (
+          playerRight > obstacle.x &&
+          player.x < obstacleRight &&
+          previousBottom <= obstacleTop &&
+          playerBottom >= obstacleTop
+        ) {
+          player.y = obstacleTop - player.height;
+          player.velocityY = 0;
+          player.onGround = true;
+          return;
+        }
+      }
+
+      if (!parkourMode && player.y >= floorY) {
+        player.y = floorY;
+        player.velocityY = 0;
+        player.onGround = true;
+      }
+    }
+
+    function updateGame(timestamp) {
+      if (miniGameArea.style.display === 'flex') {
+        if (!lastSpawnTime) {
+          lastSpawnTime = timestamp;
+        }
+
+        if (!parkourMode && timestamp - lastSpawnTime >= 4000) {
+          spawnObstacle();
+          lastSpawnTime = timestamp;
+        }
+
+        obstacles.forEach((obstacle) => {
+          obstacle.x -= obstacle.speed;
+
+          if (!parkourMode && !obstacle.counted && obstacle.x + obstacle.width < player.x) {
+            obstacle.counted = true;
+            jumpedBlocks += 1;
+            obstacleHeight += 8;
+            updateScore();
+
+            if (jumpedBlocks >= 6) {
+              startParkourMode();
+            }
+          }
+        });
+
+        for (let index = obstacles.length - 1; index >= 0; index -= 1) {
+          if (obstacles[index].x + obstacles[index].width < 0) {
+            obstacles.splice(index, 1);
+          }
+        }
+
+        if (keys.a) {
+          player.velocityX = -player.speed;
+        } else if (keys.d) {
+          player.velocityX = player.speed;
+        } else {
+          player.velocityX = 0;
+        }
+
+        if (keys.w) {
+          player.y -= player.speed;
+        }
+
+        if (keys.s) {
+          player.y += player.speed;
+        }
+
+        player.velocityY += gravity;
+        player.x += player.velocityX;
+        player.y += player.velocityY;
+
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > gameCanvas.width) player.x = gameCanvas.width - player.width;
+        if (player.y < 0) player.y = 0;
+        landOnPlatform();
+
+        if (!parkourMode && obstacles.some(isColliding)) {
+          resetMiniGame();
+        }
+
+        if (parkourMode && player.y + player.height >= groundTop) {
+          resetMiniGame();
+        }
+
+        if (parkourMode && player.x + player.width >= gameCanvas.width - 20) {
+          winMessage.style.display = 'block';
+        }
+      }
+
+      drawGame();
+      requestAnimationFrame(updateGame);
+    }
+
+    showButton.addEventListener('click', () => {
+      showButton.style.display = 'none';
+      iconBox.style.display = 'flex';
+      optionBar.style.display = 'flex';
+      gamesButton.style.display = 'inline-block';
+      developerModeButton.style.display = 'inline-block';
+      winMessage.style.display = 'none';
+    });
+
+    gamesButton.addEventListener('click', () => {
+      mainTitle.style.display = 'none';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gameBar.style.display = 'flex';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      parkourHint.style.display = 'none';
+    });
+
+    miniGameButton.addEventListener('click', () => {
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'flex';
+      scoreBoard.style.display = 'block';
+      resetMiniGame();
+    });
+
+    developerModeButton.addEventListener('click', () => {
+      mainTitle.style.display = 'none';
+      showButton.style.display = 'none';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'flex';
+      resetMiniGame();
+      jumpedBlocks = 6;
+      updateScore();
+      startParkourMode();
+      winMessage.style.display = 'none';
+    });
+
+    playAgainButton.addEventListener('click', () => {
+      winMessage.style.display = 'none';
+      miniGameArea.style.display = 'flex';
+      resetMiniGame();
+    });
+
+    mainMenuButton.addEventListener('click', () => {
+      mainTitle.style.display = 'block';
+      showButton.style.display = 'inline-block';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+    });
+
+    videoMenuMainButton.addEventListener('click', () => {
+      mainTitle.style.display = 'block';
+      showButton.style.display = 'inline-block';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+    });
+
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.toLowerCase();
+      if (['w', 'a', 's', 'd', ' '].includes(key) || event.code === 'Space') {
+        event.preventDefault();
+      }
+
+      if (key === ' ' || event.code === 'Space') {
+        if (player.onGround) {
+          player.velocityY = player.jumpPower;
+          player.onGround = false;
+        }
+        return;
+      }
+
+      if (['w', 'a', 's', 'd'].includes(key)) {
+        keys[key] = true;
+      }
+    });
+
+    document.addEventListener('keyup', (event) => {
+      const key = event.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(key)) {
+        keys[key] = false;
+      }
+    });
+
+    updateScore();
+    drawGame();
+    updateGame();
+  </script>
+</body>
+</html>
