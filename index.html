@@ -19,6 +19,48 @@
       text-align: center;
     }
 
+    #sideBar {
+      position: fixed;
+      top: 0;
+      left: -220px;
+      width: 220px;
+      height: 100vh;
+      padding: 24px 16px;
+      box-sizing: border-box;
+      background: #5a2d0c;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: left 0.25s ease;
+      z-index: 20;
+    }
+
+    #sideBar:hover,
+    #sideBarTrigger:hover + #sideBar {
+      left: 0;
+    }
+
+    #sideBarTrigger {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 100vh;
+      z-index: 21;
+    }
+
+    .sideLink {
+      display: inline-block;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: left;
+    }
+
     h1 {
       margin: 0;
       font-size: 2rem;
@@ -128,6 +170,13 @@
   </style>
 </head>
 <body>
+  <div id="sideBarTrigger"></div>
+  <div id="sideBar">
+    <div>the fun game</div>
+    <a class="sideLink" href="#" id="sideMainMenuLink">main menu</a>
+    <a class="sideLink" href="#" id="sideGamesLink">video games</a>
+    <a class="sideLink" href="#" id="sideMiniGameLink">mini game</a>
+  </div>
   <div id="scoreBoard">jumps: 0</div>
   <div id="winMessage">
     <div>you won</div>
@@ -160,6 +209,9 @@
 
   <script>
     const showButton = document.getElementById('showButton');
+    const sideMainMenuLink = document.getElementById('sideMainMenuLink');
+    const sideGamesLink = document.getElementById('sideGamesLink');
+    const sideMiniGameLink = document.getElementById('sideMiniGameLink');
     const gamesButton = document.getElementById('gamesButton');
     const developerModeButton = document.getElementById('developerModeButton');
     const mainTitle = document.getElementById('mainTitle');
@@ -403,6 +455,51 @@
       gamesButton.style.display = 'inline-block';
       developerModeButton.style.display = 'inline-block';
       winMessage.style.display = 'none';
+    });
+
+    sideMainMenuLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      mainTitle.style.display = 'block';
+      showButton.style.display = 'inline-block';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+    });
+
+    sideGamesLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      showButton.style.display = 'none';
+      mainTitle.style.display = 'none';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'flex';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+    });
+
+    sideMiniGameLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      showButton.style.display = 'none';
+      mainTitle.style.display = 'none';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'flex';
+      scoreBoard.style.display = 'block';
+      winMessage.style.display = 'none';
+      resetMiniGame();
     });
 
     gamesButton.addEventListener('click', () => {
