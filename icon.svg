@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="120" fill="#ff8a00"/>
+  <circle cx="256" cy="256" r="170" fill="#ffd766"/>
+  <path d="M120 160h272L256 392 120 160Z" fill="#f9e7a6"/>
+  <path d="M144 160h224L256 344 144 160Z" fill="#f4c05a"/>
+  <circle cx="214" cy="220" r="20" fill="#d63f2e"/>
+  <circle cx="286" cy="206" r="20" fill="#d63f2e"/>
+  <circle cx="254" cy="270" r="20" fill="#d63f2e"/>
+  <text x="256" y="470" font-size="56" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#ffffff">TFG</text>
+</svg>

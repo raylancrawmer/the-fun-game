@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff8a00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="The Fun Game">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>The Fun Game</title>
   <style>
     body {
@@ -48,6 +55,22 @@
       width: 18px;
       height: 100vh;
       z-index: 21;
+    }
+
+    #sideBarTab {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      padding: 12px 8px;
+      border-radius: 0 12px 12px 0;
+      background: #ff8a00;
+      color: white;
+      font-weight: bold;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      z-index: 19;
+      pointer-events: none;
     }
 
     .sideLink {
@@ -167,10 +190,36 @@
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
       font-weight: bold;
     }
+
+    #touchControls {
+      display: none;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 420px;
+    }
+
+    .touchButton {
+      min-width: 90px;
+      padding: 16px 18px;
+      border: none;
+      border-radius: 16px;
+      background: #ff8a00;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      touch-action: manipulation;
+    }
+
+    .touchIcon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
   <div id="sideBarTrigger"></div>
+  <div id="sideBarTab">menu</div>
   <div id="sideBar">
     <div>the fun game</div>
     <a class="sideLink" href="#" id="sideMainMenuLink">main menu</a>
@@ -204,6 +253,11 @@
     <canvas id="gameCanvas" width="500" height="260"></canvas>
     <div id="parkourHint">one of the pillars is fake</div>
     <div>use w a s d to move and space bar to jump</div>
+    <div id="touchControls">
+      <button class="touchButton" id="leftButton" aria-label="move left"><span class="touchIcon">⬅️</span></button>
+      <button class="touchButton" id="jumpButton" aria-label="jump up"><span class="touchIcon">⬆️</span></button>
+      <button class="touchButton" id="rightButton" aria-label="move right"><span class="touchIcon">➡️</span></button>
+    </div>
     <button id="mainMenuButton">main menu</button>
   </div>
 
@@ -226,6 +280,10 @@
     const winMessage = document.getElementById('winMessage');
     const playAgainButton = document.getElementById('playAgainButton');
     const parkourHint = document.getElementById('parkourHint');
+    const touchControls = document.getElementById('touchControls');
+    const leftButton = document.getElementById('leftButton');
+    const rightButton = document.getElementById('rightButton');
+    const jumpButton = document.getElementById('jumpButton');
     const gameCanvas = document.getElementById('gameCanvas');
     const gameContext = gameCanvas.getContext('2d');
 
@@ -255,6 +313,52 @@
       scoreBoard.textContent = `jumps: ${jumpedBlocks}`;
     }
 
+    function setMainMenuView() {
+      mainTitle.style.display = 'block';
+      showButton.style.display = 'inline-block';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+      touchControls.style.display = 'none';
+    }
+
+    function openGamesMenu() {
+      showButton.style.display = 'none';
+      mainTitle.style.display = 'none';
+      iconBox.style.display = 'none';
+      optionBar.style.display = 'none';
+      gamesButton.style.display = 'none';
+      developerModeButton.style.display = 'none';
+      gameBar.style.display = 'flex';
+      miniGameArea.style.display = 'none';
+      scoreBoard.style.display = 'none';
+      winMessage.style.display = 'none';
+      parkourHint.style.display = 'none';
+      touchControls.style.display = 'none';
+    }
+
+    function openMiniGame() {
+      gameBar.style.display = 'none';
+      miniGameArea.style.display = 'flex';
+      scoreBoard.style.display = 'block';
+      touchControls.style.display = 'flex';
+      winMessage.style.display = 'none';
+      resetMiniGame();
+    }
+
+    function jumpPlayer() {
+      if (player.onGround) {
+        player.velocityY = player.jumpPower;
+        player.onGround = false;
+      }
+    }
+
     function resetMiniGame() {
       player.x = 40;
       player.y = 190;
@@ -274,14 +378,14 @@
     function buildParkourCourse() {
       obstacles.length = 0;
       obstacles.push(
-        { x: 30, width: 70, height: 70, speed: 0, counted: true },
-        { x: 130, width: 70, height: 105, speed: 0, counted: true },
-        { x: 240, width: 70, height: 140, speed: 0, counted: true },
-        { x: 340, width: 70, height: 95, speed: 0, counted: true },
-        { x: 420, width: 60, height: 155, speed: 0, counted: true }
+        { x: 40, width: 55, height: 55, speed: 0, counted: true },
+        { x: 130, width: 55, height: 78, speed: 0, counted: true },
+        { x: 220, width: 55, height: 96, speed: 0, counted: true },
+        { x: 310, width: 55, height: 74, speed: 0, counted: true },
+        { x: 400, width: 50, height: 90, speed: 0, counted: true }
       );
 
-      player.x = 45;
+      player.x = 50;
       player.y = groundTop - obstacles[0].height - player.height;
       player.velocityX = 0;
       player.velocityY = 0;
@@ -459,64 +563,25 @@
 
     sideMainMenuLink.addEventListener('click', (event) => {
       event.preventDefault();
-      mainTitle.style.display = 'block';
-      showButton.style.display = 'inline-block';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gamesButton.style.display = 'none';
-      developerModeButton.style.display = 'none';
-      gameBar.style.display = 'none';
-      miniGameArea.style.display = 'none';
-      scoreBoard.style.display = 'none';
-      winMessage.style.display = 'none';
-      parkourHint.style.display = 'none';
+      setMainMenuView();
     });
 
     sideGamesLink.addEventListener('click', (event) => {
       event.preventDefault();
-      showButton.style.display = 'none';
-      mainTitle.style.display = 'none';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gamesButton.style.display = 'none';
-      developerModeButton.style.display = 'none';
-      gameBar.style.display = 'flex';
-      miniGameArea.style.display = 'none';
-      scoreBoard.style.display = 'none';
-      winMessage.style.display = 'none';
-      parkourHint.style.display = 'none';
+      openGamesMenu();
     });
 
     sideMiniGameLink.addEventListener('click', (event) => {
       event.preventDefault();
-      showButton.style.display = 'none';
-      mainTitle.style.display = 'none';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gamesButton.style.display = 'none';
-      developerModeButton.style.display = 'none';
-      gameBar.style.display = 'none';
-      miniGameArea.style.display = 'flex';
-      scoreBoard.style.display = 'block';
-      winMessage.style.display = 'none';
-      resetMiniGame();
+      openMiniGame();
     });
 
     gamesButton.addEventListener('click', () => {
-      mainTitle.style.display = 'none';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gameBar.style.display = 'flex';
-      miniGameArea.style.display = 'none';
-      scoreBoard.style.display = 'none';
-      parkourHint.style.display = 'none';
+      openGamesMenu();
     });
 
     miniGameButton.addEventListener('click', () => {
-      gameBar.style.display = 'none';
-      miniGameArea.style.display = 'flex';
-      scoreBoard.style.display = 'block';
-      resetMiniGame();
+      openMiniGame();
     });
 
     developerModeButton.addEventListener('click', () => {
@@ -528,6 +593,7 @@
       developerModeButton.style.display = 'none';
       gameBar.style.display = 'none';
       miniGameArea.style.display = 'flex';
+      touchControls.style.display = 'flex';
       resetMiniGame();
       jumpedBlocks = 6;
       updateScore();
@@ -542,31 +608,11 @@
     });
 
     mainMenuButton.addEventListener('click', () => {
-      mainTitle.style.display = 'block';
-      showButton.style.display = 'inline-block';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gamesButton.style.display = 'none';
-      developerModeButton.style.display = 'none';
-      gameBar.style.display = 'none';
-      miniGameArea.style.display = 'none';
-      scoreBoard.style.display = 'none';
-      winMessage.style.display = 'none';
-      parkourHint.style.display = 'none';
+      setMainMenuView();
     });
 
     videoMenuMainButton.addEventListener('click', () => {
-      mainTitle.style.display = 'block';
-      showButton.style.display = 'inline-block';
-      iconBox.style.display = 'none';
-      optionBar.style.display = 'none';
-      gamesButton.style.display = 'none';
-      developerModeButton.style.display = 'none';
-      gameBar.style.display = 'none';
-      miniGameArea.style.display = 'none';
-      scoreBoard.style.display = 'none';
-      winMessage.style.display = 'none';
-      parkourHint.style.display = 'none';
+      setMainMenuView();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -576,10 +622,7 @@
       }
 
       if (key === ' ' || event.code === 'Space') {
-        if (player.onGround) {
-          player.velocityY = player.jumpPower;
-          player.onGround = false;
-        }
+        jumpPlayer();
         return;
       }
 
@@ -595,9 +638,45 @@
       }
     });
 
+    function bindTouchHold(button, keyName) {
+      const press = (event) => {
+        event.preventDefault();
+        keys[keyName] = true;
+      };
+
+      const release = (event) => {
+        event.preventDefault();
+        keys[keyName] = false;
+      };
+
+      button.addEventListener('touchstart', press, { passive: false });
+      button.addEventListener('touchend', release, { passive: false });
+      button.addEventListener('touchcancel', release, { passive: false });
+      button.addEventListener('mousedown', press);
+      button.addEventListener('mouseup', release);
+      button.addEventListener('mouseleave', release);
+    }
+
+    bindTouchHold(leftButton, 'a');
+    bindTouchHold(rightButton, 'd');
+
+    const triggerJump = (event) => {
+      event.preventDefault();
+      jumpPlayer();
+    };
+
+    jumpButton.addEventListener('touchstart', triggerJump, { passive: false });
+    jumpButton.addEventListener('mousedown', triggerJump);
+
     updateScore();
     drawGame();
     updateGame();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js');
+      });
+    }
   </script>
 </body>
 </html>
